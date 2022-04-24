@@ -22,6 +22,18 @@ class Singleton
 -- @local
 makeRequest = (req) ->
   responseBody = {}
+
+  -- http.request{ -- https://tst2005.github.io/lua-socket/http.html
+  --     url = string,
+  --     [sink = LTN12 sink,]
+  --     [method = string,]
+  --     [headers = header-table,]
+  --     [source = LTN12 source],
+  --     [step = LTN12 pump step,]
+  --     [proxy = string,]
+  --     [redirect = boolean,]
+  --     [create = function]
+  -- }
   fullRequest =
     method: req.method
     url: req.url
