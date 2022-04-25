@@ -58,11 +58,35 @@ class Request extends Singleton
 
     response
 
+  -- @local
+  -- Format the URL based on the parameters.
+  formatParams = (url, params) ->
+    if not params or next(params) == nil then return url
+
+    url ..= '?'
+
+    for k, v in pairs params
+      if tostring v
+        url ..= tostring(k)..'='
+
+        if type(v) == 'table'
+          stringVal = ''
+          for _, val in ipairs(v)
+            stringVal ..= tostring(val) .. ","
+
+          url ..= stringVal\sub 0, -2
+        else
+          url ..= tostring v
+
+        url ..= '&'
+
+    url\sub 0, -2
+
+
   new: =>
     @httpSocket = httpSocket
     @httpsSocket = httpsSocket
 
-    Log.info "test"
 
 
 
