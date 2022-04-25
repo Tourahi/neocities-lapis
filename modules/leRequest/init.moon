@@ -1,3 +1,4 @@
+--- This module is lua-requests rewritten in ms to help me understand some concepts :).
 
 httpSocket   = assert require 'socket.http'
 httpsSocket  = assert require 'ssl.https'
@@ -7,6 +8,10 @@ json         = assert require 'cjson.safe'
 xml          = assert require 'xml'
 mime         = assert require 'mime'
 md5Sum       = assert require 'md5'
+
+
+
+
 
 -- @local
 class Singleton
@@ -82,6 +87,85 @@ class Request extends Singleton
 
     url\sub 0, -2
 
+  -- @local
+  -- checks if a URL was given and appends params to it.
+  checkURL = (request) ->
+    assert request.url, 'No url specified for request'
+    request.url = formatParams request.url, request.params
+
+  checkDATA = (request) ->
+    if type(request.data) == "table"
+      request.data = json.encode request.data
+    elseif request.data then request.data = tostring request.data
+
+  -- @local
+  -- adds basic authentication to the request header.
+  basicAuthHeader = (request) ->
+    enc = mime.b64 request.auth.user .. ':' .. request.auth.password
+    request.headers.Authorization = 'Basic '.. enc
+
+  md5Hash = (...) ->
+    md5Sum.sumhexa table.concat({...}, ":")
+
+  digestHashResponse = (authTab) ->
+    md5Hash(
+      md5Hash(authTab.user, authTab.realm, authTab.password),
+      authTab.nonce,
+      authTab.nc,
+      authTab.cnonce,
+      authTab.qop,
+      md5Hash(authTab.method, authTab.uri)
+    )
+
+  digestCreateHeaderString = (auth) ->
+    local authorization
+    authorization = 'Digest username="'..auth.user..'", realm="'..auth.realm..'", nonce="'..auth.nonce
+    authorization = authorization..'", uri="'..auth.uri..'", qop='..auth.qop..', nc='..auth.nc
+    authorization = authorization..', cnonce="'..auth.cnonce..'", response="'..auth.response..'"'
+
+    if auth.opaque then
+      authorization = authorization..', opaque="'..auth.opaque..'"'
+
+    authorization
+
+  digestAuthHeader = (request) ->
+    if not request.auth.nonce then return
+
+    local url
+
+    request.auth.cnonce = request.auth.cnonce or string.format("%08x", os.time())
+
+    request.auth.nc_count = request.auth.nc_count or 0
+    request.auth.nc_count = request.auth.nc_count + 1
+
+    request.auth.nc = string.format("%08x", request.auth.nc_count)
+
+    url = urlParser.parse(request.url)
+    request.auth.uri = urlParser.build {path: url.path, query: url.query}
+    request.auth.method = request.method
+    request.auth.qop = 'auth'
+
+    request.auth.response = digestHashResponse request.auth
+    request.headers.Authorization = digestCreateHeaderString request.auth
+
+  addAuthHeaders = (request) ->
+    addAuthCB =
+      basic: basicAuthHeader
+      digest: digestAuthHeader
+
+    addAuthCB[request.auth._type](request)
+
+  createHeader = (request) ->
+    request.headers = request.headers or {}
+    if request.data then request.headers['Content-Length'] = request.data\len!
+
+    if request.cookies
+      if request.headers.cookie
+        request.headers.cookie ..= '; '..request.cookies
+      else
+        request.headers.cookie = request.cookies
+
+    if request.auth then addAuthHeaders request
 
   new: =>
     @httpSocket = httpSocket
