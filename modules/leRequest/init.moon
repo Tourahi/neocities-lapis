@@ -65,8 +65,11 @@ class Request extends Singleton
 
   -- @local
   itrUrlParams = (url, params) ->
-    n = 1
-    for i, _ in ipairs(params) do n = i
+    tostring = tostring
+    next = next
+    type = type
+
+    n = #params
 
     url ..= '?'
 
@@ -83,14 +86,13 @@ class Request extends Singleton
       if i and v
         if type(v) == "table"
           stringVal = ''
-          for _, val in ipairs(v)
-            stringVal ..= tostring(val) .. ","
+          for k = 1, #v
+            stringVal ..= tostring(v[k]) .. ","
           url ..= stringVal\sub 0, -2
         else
           url ..= tostring v
 
-        l, f = next(t, i)
-        if l ~= nil and f ~= nil then url ..= '&'
+        url ..= '&'
 
         return i, v, url
 
@@ -100,7 +102,7 @@ class Request extends Singleton
   -- @local
   -- Format the URL based on the parameters.
   -- If my solution is faster this will be removed.
-  _formatParams = (url, params) ->
+  formatParams = (url, params) ->
     if not params or next(params) == nil then return url
 
     url ..= '?'
@@ -111,7 +113,8 @@ class Request extends Singleton
 
         if type(v) == 'table'
           stringVal = ''
-          for _, val in ipairs(v)
+          for j = 1, #v
+            val = v[j]
             stringVal ..= tostring(val) .. ","
 
           url ..= stringVal\sub 0, -2
@@ -122,23 +125,25 @@ class Request extends Singleton
 
     url\sub 0, -2
 
-  formatParams = (url, params) ->
+  -- @local
+  _formatParams = (url, params) ->
     if not params then return url
     local urlParam
 
     for _, _, URL in itrUrlParams url, params
       urlParam = URL
+      -- if cb then cb urlParam\sub 0, -2
 
-    urlParam
+    urlParam\sub 0, -2
 
   -- @local
   -- checks if a URL was given and appends params to it.
   checkURL = (request) ->
     assert request.url, 'No url specified for request'
-    Profiler.start!
+    --Profiler.start! -- TODO: Profiling toggle
     request.url = formatParams request.url, request.params
-    Profiler.stop!
-    Profiler.report("profiling/newParamFormat.log")
+    --Profiler.stop!
+    --Profiler.report("profiling/oldParamFormat.log")
 
   -- @local
   checkDATA = (request) ->
@@ -290,11 +295,43 @@ class Request extends Singleton
     else
       return makeRequest req
 
-
+  -- GET
   get: (url, args) =>
     return @request "GET", url, args
 
+  -- POST
+  post: (url, args) =>
+    return @request "POST", url, args
 
+  -- PUT
+  put: (url, args) =>
+    return @request "PUT", url, args
+
+  -- DELETE
+  delete: (url, args) =>
+    return @request "DELETE", url, args
+
+  -- PATCH
+  patch: (url, args) =>
+    return @request "PATCH", url, args
+
+  -- OPTIONS
+  options: (url, args) =>
+    return @request "OPTIONS", url, args
+
+  -- HEAD
+  head: (url, args) =>
+    return @request "HEAD", url, args
+
+  -- TRACE
+  trace: (url, args) =>
+    return @request "TRACE", url, args
+
+  HTTPDigestAuth: (user, password) =>
+    { _type: 'digest', user: user, password: password }
+
+  HTTPBasicAuth: (user, password) =>
+    { _type: 'basic', user: user, password: password }
 
 
 Request.getInstance!
