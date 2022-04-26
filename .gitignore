@@ -10,6 +10,7 @@ secret/
 node_modules/
 /luarocks
 /lua
+/tests/*
 /lua_modules
 /.luarocks
 /luarocks

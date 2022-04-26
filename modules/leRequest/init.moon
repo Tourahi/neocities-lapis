@@ -123,6 +123,7 @@ class Request extends Singleton
     url\sub 0, -2
 
   formatParams = (url, params) ->
+    if not params then return url
     local urlParam
 
     for _, _, URL in itrUrlParams url, params
@@ -135,7 +136,6 @@ class Request extends Singleton
   checkURL = (request) ->
     assert request.url, 'No url specified for request'
     request.url = formatParams request.url, request.params
-    Log.info request.url
 
   -- @local
   checkDATA = (request) ->
