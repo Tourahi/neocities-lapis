@@ -1,13 +1,19 @@
 lapis = require "lapis"
 leRequest =  require "modules.leRequest.init"
+import to_json from require "lapis.util"
+import after_dispatch from require "lapis.nginx.context"
+
 
 class extends lapis.Application
-  "/cat": =>
-    res = leRequest\get 'https://catfact.ninja/fact'
+  -- @before_filter =>
+  --   after_dispatch ->
+  --     Log.info ngx.ctx.performance
 
-    Log.info leRequest
+  "/cat": =>
+    queryparameters = { max_length: 100}
+    res = leRequest\get 'https://catfact.ninja/fact', params: queryparameters
 
 
     json:
-      message: res.JSON!
+      message: {res.JSON!}
 

@@ -64,8 +64,43 @@ class Request extends Singleton
     response
 
   -- @local
+  itrUrlParams = (url, params) ->
+    n = 1
+    for i, _ in ipairs(params) do n = i
+
+    url ..= '?'
+
+    local iter
+
+    iter = (t, i) ->
+      local v
+      while true
+        i, v = next(t, i)
+        break if(i == nil or type(i) ~= 'number' or i > n)
+
+      url ..= tostring(i)..'='
+
+      if i and v
+        if type(v) == "table"
+          stringVal = ''
+          for _, val in ipairs(v)
+            stringVal ..= tostring(val) .. ","
+          url ..= stringVal\sub 0, -2
+        else
+          url ..= tostring v
+
+        l, f = next(t, i)
+        if l ~= nil and f ~= nil then url ..= '&'
+
+        return i, v, url
+
+    return iter, params, nil
+
+
+  -- @local
   -- Format the URL based on the parameters.
-  formatParams = (url, params) ->
+  -- If my solution is faster this will be removed.
+  _formatParams = (url, params) ->
     if not params or next(params) == nil then return url
 
     url ..= '?'
@@ -87,11 +122,20 @@ class Request extends Singleton
 
     url\sub 0, -2
 
+  formatParams = (url, params) ->
+    local urlParam
+
+    for _, _, URL in itrUrlParams url, params
+      urlParam = URL
+
+    urlParam
+
   -- @local
   -- checks if a URL was given and appends params to it.
   checkURL = (request) ->
     assert request.url, 'No url specified for request'
     request.url = formatParams request.url, request.params
+    Log.info request.url
 
   -- @local
   checkDATA = (request) ->

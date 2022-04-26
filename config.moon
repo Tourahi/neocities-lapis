@@ -10,7 +10,7 @@ config {"development", "test"}, ->
 
   admin_email "tourahi.amine@gmail.com"
 
-  --measure_performance true
+  measure_performance true
 
   app_name "neocities-lapis"
   host "localhost"
@@ -23,5 +23,5 @@ config {"development", "test"}, ->
   logging {
     requests: true
     queries: true
-    server: true
+    server: false
   }
