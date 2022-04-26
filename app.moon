@@ -1,15 +1,13 @@
 lapis = require "lapis"
-requests = require 'requests'
 leRequest =  require "modules.leRequest.init"
 
 class extends lapis.Application
   "/cat": =>
-    res = requests.get 'https://catfact.ninja/fact'
+    res = leRequest\get 'https://catfact.ninja/fact'
 
-    reqs = leRequest.getInstance!
-
+    Log.info leRequest
 
 
     json:
-      message: res.json!
+      message: res.JSON!
 

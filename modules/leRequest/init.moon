@@ -52,7 +52,7 @@ class Request extends Singleton
 
     response = {}
     local ok
-    socket = string.find(fullRequest.URL, '^https:') and not req.proxy and httpsSocket or httpSocket
+    socket = string.find(fullRequest.url, '^https:') and not req.proxy and httpsSocket or httpSocket
 
     ok, response.STATUS_CODE, response.HEADERS, response.STATUS = socket.request fullRequest
 
@@ -226,7 +226,28 @@ class Request extends Singleton
   request: (method, url, args) =>
     req = {}
 
+    if type(url) == "table"
+      req = url
+      if not req.url and req[1]
+        req.url = table.remove req, 1
+    else
+      req = args or {}
+      req.url = url
+
+    req.method = method
+    parseArgs req
+
+    if req.auth and req.auth._type == 'digest'
+      res = makeRequest req
+      return useDigest res, req
+    else
+      return makeRequest req
+
+
+  get: (url, args) =>
+    return @request "GET", url, args
 
 
 
 
+Request.getInstance!
