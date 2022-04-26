@@ -93,6 +93,7 @@ class Request extends Singleton
     assert request.url, 'No url specified for request'
     request.url = formatParams request.url, request.params
 
+  -- @local
   checkDATA = (request) ->
     if type(request.data) == "table"
       request.data = json.encode request.data
@@ -104,9 +105,11 @@ class Request extends Singleton
     enc = mime.b64 request.auth.user .. ':' .. request.auth.password
     request.headers.Authorization = 'Basic '.. enc
 
+  -- @local
   md5Hash = (...) ->
     md5Sum.sumhexa table.concat({...}, ":")
 
+  -- @local
   digestHashResponse = (authTab) ->
     md5Hash(
       md5Hash(authTab.user, authTab.realm, authTab.password),
@@ -117,6 +120,7 @@ class Request extends Singleton
       md5Hash(authTab.method, authTab.uri)
     )
 
+  -- @local
   digestCreateHeaderString = (auth) ->
     local authorization
     authorization = 'Digest username="'..auth.user..'", realm="'..auth.realm..'", nonce="'..auth.nonce
@@ -128,6 +132,7 @@ class Request extends Singleton
 
     authorization
 
+  -- @local
   digestAuthHeader = (request) ->
     if not request.auth.nonce then return
 
@@ -148,6 +153,7 @@ class Request extends Singleton
     request.auth.response = digestHashResponse request.auth
     request.headers.Authorization = digestCreateHeaderString request.auth
 
+  -- @local
   addAuthHeaders = (request) ->
     addAuthCB =
       basic: basicAuthHeader
@@ -155,6 +161,7 @@ class Request extends Singleton
 
     addAuthCB[request.auth._type](request)
 
+  -- @local
   createHeader = (request) ->
     request.headers = request.headers or {}
     if request.data then request.headers['Content-Length'] = request.data\len!
@@ -167,9 +174,58 @@ class Request extends Singleton
 
     if request.auth then addAuthHeaders request
 
+  -- @local
+  -- Set timeout
+  checkTIMEOUT = (timeout) ->
+    httpSocket.TIMEOUT = timeout or 5
+    httpsSocket.TIMEOUT = timeout or 5
+
+  -- @local
+  checkREDIRECT = (allowRedirects) ->
+    if allowRedirects and type(allowRedirects) != "boolean"
+      error "checkREDIRECT expects a boolean value. received type : " .. type(allowRedirects)
+
+  -- @local
+  parseArgs = (request) ->
+    checkURL request
+    checkDATA request
+    createHeader request
+    checkTIMEOUT request.timeout
+    checkREDIRECT request.allowRedirects
+
+  parseDigestResponseHeader = (res, req) ->
+    for k, v in res.HEADERS['www-authenticate']\gmatch('(%w+)="(%S+)"')
+      req.auth[k] = v
+
+    if req.headers.cookie
+      req.headers.cookie = req.headers.cookie..'; ' .. res.HEADERS['set-cookie']
+    else
+      req.headers.cookie = res.HEADERS['set-cookie']
+
+    req.auth.nc_count = 0
+
+
+  useDigest = (res, req) ->
+    if res.STATUS_CODE == 401
+      parseDigestResponseHeader res, req
+      createHeader req
+      res = makeRequest req
+      res.AUTH = req.auth
+      res.COOKIES = req.headers.cookie
+      return res
+    else
+      res.AUTH = req.auth
+      res.COOKIES = req.headers.cookie
+      return res
+
+
   new: =>
     @httpSocket = httpSocket
     @httpsSocket = httpsSocket
+
+  request: (method, url, args) =>
+    req = {}
+
 
 
 
