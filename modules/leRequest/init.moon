@@ -135,7 +135,10 @@ class Request extends Singleton
   -- checks if a URL was given and appends params to it.
   checkURL = (request) ->
     assert request.url, 'No url specified for request'
+    Profiler.start!
     request.url = formatParams request.url, request.params
+    Profiler.stop!
+    Profiler.report("profiling/newParamFormat.log")
 
   -- @local
   checkDATA = (request) ->

@@ -11,7 +11,7 @@ class extends lapis.Application
 
   "/cat": =>
     queryparameters = { max_length: 100}
-    res = leRequest\get 'https://catfact.ninja/fact'
+    res = leRequest\get 'https://catfact.ninja/fact', params: queryparameters
 
 
     json:
