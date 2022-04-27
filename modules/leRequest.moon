@@ -333,5 +333,8 @@ class Request extends Singleton
   HTTPBasicAuth: (user, password) =>
     { _type: 'basic', user: user, password: password }
 
+  CredentialStr: (user, password) =>
+    return user .. ':' .. password .. '@'
+
 
 Request.getInstance!
