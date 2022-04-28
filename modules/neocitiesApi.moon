@@ -40,8 +40,6 @@ class NeoCities
     @url      = url
     @url.scheme = @url.scheme .. '://'
 
-    -- Use in normal Lua/Moonscript project
-    -- But not in Lapis since the entity will be created in every request. { apiKey: false }
     if opts and ContainsKey(opts,"apiKey")
       @apiKey = GetApiKey(@).JSON!.api_key
 
