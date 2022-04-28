@@ -21,8 +21,10 @@ class NeoCities
   Get: (method, params, needAuth) =>
     path = '/api/' .. method
     if @apiKey == nil
+      Log.info "Using : username:password"
       return LeRequest\get @urlAssemble(needAuth, path), params: params
     else
+      Log.info "Using : api key"
       return LeRequest\get @urlAssemble(false, path), headers: {['Authorization']: 'Bearer ' .. @apiKey}
 
   new: (user, password, opts) =>

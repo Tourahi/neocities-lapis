@@ -4,7 +4,7 @@ import config from require "lapis.config"
 
 config {"development", "test"}, ->
   port 9090
-  code_cache "off"
+  code_cache "on"
   daemon "off"
   notice_log "stderr"
 
