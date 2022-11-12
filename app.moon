@@ -25,8 +25,6 @@ class extends lapis.Application
     json:
       message: {res.JSON!}
 
-  "/upload": =>
-    res = account\upload {'test.html', './test.html'}
 
     json:
-      message: {res.JSON!}
+      message: {res.json!}

@@ -54,7 +54,9 @@ class Request extends Singleton
     local ok
     socket = string.find(fullRequest.url, '^https:') and not req.proxy and httpsSocket or httpSocket
 
+
     ok, response.STATUS_CODE, response.HEADERS, response.STATUS = socket.request fullRequest
+
 
     assert ok, 'Error: whoops! -> ' .. req.method .. ' request: ' .. response.STATUS_CODE
     response.TEXT = table.concat responseBody

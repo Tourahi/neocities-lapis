@@ -1,6 +1,5 @@
 Url = require 'lua.resty.url'
 LeRequest =  require "modules.leRequest"
-ltn12        = assert require 'ltn12'
 
 class NeoCities
 
@@ -64,11 +63,6 @@ class NeoCities
     if path then return @Get 'list', {path: path}, true
     else @Get 'list', {}, true
 
-  -- upload: (file) =>
-  --   file = io.open("./test.html", "r")
-  --   data = file\read "*a"
-  --   if file
-  --     return LeRequest\post @urlAssemble(true, '/api/upload'), data: {"test.html": ltn12.source.string(data)!}
 
   getApiKey: =>
     if @apiKey then return @apiKey
