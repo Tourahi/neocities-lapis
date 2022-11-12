@@ -49,8 +49,10 @@ class NeoCities
     @url      = url
     @url.scheme = @url.scheme .. '://'
 
-    if opts and ContainsKey(opts,"apiKey")
-      @apiKey = GetApiKey(@).JSON!.api_key
+
+    if opts and ContainsKey(opts,"apiKey") and opts.apiKey == true
+      api_key = GetApiKey(@).JSON!.api_key
+      @apiKey = api_key
 
 
   -- "https://neocities.org/api/info?sitename=sn"
